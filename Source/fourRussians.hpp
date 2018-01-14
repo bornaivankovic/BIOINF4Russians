@@ -14,11 +14,15 @@ class fourRussians{
         string vString;
         vector<vector<int>> perms;
         unordered_map<string, tBlock> blockMap;
+        vector< vector<int> > dTable;
         
 
         fourRussians(int t, string hstring, string vstring); 
 
         void permutate(vector<int> posOffset,vector<int> prefix, int length);
         void generateTBlocks();
+        void fillDTable();
+        void printDTable();
+        int getMinDistance();
 };
 
