@@ -1,6 +1,8 @@
+#pragma once
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "tBlock.hpp"
 
 
 using namespace std;
@@ -10,7 +12,8 @@ class fourRussians{
         int t;
         string hString;
         string vString;
-        std::vector<vector<int>> perms;
+        vector<vector<int>> perms;
+        unordered_map<string, tBlock> blockMap;
         
 
         fourRussians(int t, string hstring, string vstring); 
