@@ -23,7 +23,7 @@ int main(){
     }
 
     cout<<"\n";
-    fourRussians fr=fourRussians(2,"cbac","baba");
+    fourRussians fr=fourRussians(2,"cbac","babb");
     fr.generateTBlocks();
     stringstream a;
     a<<"cb"<<"ba"<<"0000";

@@ -39,32 +39,38 @@ void fourRussians::generateTBlocks(){
     vector<string> hv;
     vector<string> vv;
     
+    //creating vectors containing substrings of initial strings 
     while(i<hString.length()-(t-1)){
         hv.insert(hv.begin()+j,hString.substr(i,t));
         vv.insert(vv.begin()+j,vString.substr(i,t));
-
-        //generating tBlocks for every substring and permutation combination
-        for(int k=0; k<hv.size();k++){
+        j++;
+        i=(++i)*t;
+    }
+    
+    //generating tBlocks for every substring and permutation combination
+    for(int k=0; k<hv.size();k++){
+        for(int n=0;n<vv.size();n++){
             for(int l=0;l<perms.size();l++){
-                for(int m=0;m<perms.size();m++){
-                    tBlock block=tBlock(hv.at(k),vv.at(k),perms.at(l),perms.at(m));
+               for(int m=0;m<perms.size();m++){
+                    tBlock block=tBlock(hv.at(k),vv.at(n),perms.at(l),perms.at(m));
 
                     //buidling a string key for the map
                     stringstream ss;
-                    ss<<hv.at(k)<<vv.at(k);
+                    ss<<hv.at(k)<<vv.at(n);
                     string s;
                     for(auto const& e : perms.at(l)) s += to_string(e);                      
                     for(auto const& e : perms.at(m)) s += to_string(e);
                     ss<<s;
-                    
+                        
                     //adding the tblock to the unordered_map
                     blockMap.insert( { ss.str(), block });
                 }
-            }        
-        }
-        j++;
-        i=(++i)*(t-1);
+            } 
+        }       
     }
+    //cout<<blockMap.size();
+    
+    
     
 }
 
