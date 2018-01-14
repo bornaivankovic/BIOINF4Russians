@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include "Source/tBlock.hpp"
+#include "Source/fourRussians.hpp"
 
 using namespace std;
 
@@ -20,6 +21,11 @@ int main(){
     for(int i=0;i<bl.vOffsets.size();i++){
         cout<<bl.vOffsets[i]<<",";
     }
+
+    cout<<"\n";
+    fourRussians fr=fourRussians(2,"cbac","baba");
+    fr.generateTBlocks("cbac","baba",5);
+
     cout<<endl;
     return 0;
 }
