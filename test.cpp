@@ -24,7 +24,7 @@ int main(){
 
     cout<<"\n";
     fourRussians fr=fourRussians(2,"cbac","baba");
-    fr.generateTBlocks("cbac","baba",5);
+    fr.generateTBlocks();
 
     cout<<endl;
     return 0;

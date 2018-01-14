@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "tBlock.hpp"
+#include <unordered_map>
+#include <sstream>
 
 using namespace std;
 
@@ -10,10 +13,10 @@ fourRussians::fourRussians(int t, string hString, string vString){
     this->hString=hString;
     this->vString=vString;
 }
-    //Method for generating tBlocks
-    void fourRussians::generateTBlocks(string hString, string vString, int t){
+    //Method for generating and storing tBlocks
+    void fourRussians::generateTBlocks(){
 
-        //creating permutations of offset vectors (size t)
+        //creating permutations of offset vectors (size t) 
         std::vector<int> posOffset { 0,-1,1 };
         std::vector<int> prefix;
         permutate(posOffset,prefix,t);
@@ -25,7 +28,8 @@ fourRussians::fourRussians(int t, string hString, string vString){
             }
             //cout<<"\n";
         }
-        cout<<perms.size();
+        //broj permutacija
+        //cout<<perms.size();
         
 
         //creating t size vectors of input strings and generating tBlocks 
@@ -33,22 +37,38 @@ fourRussians::fourRussians(int t, string hString, string vString){
         int j=0;
         std::vector<std::string> hv;
         std::vector<string> vv;
+        std::unordered_map<std::string, tBlock> blockMap;
         while(i<hString.length()-(t-1)){
             hv.insert(hv.begin()+j,hString.substr(i,t));
             vv.insert(vv.begin()+j,vString.substr(i,t));
 
             //generating tBlocks for every substring and permutation combination
+            for(int k=0; k<hv.size();k++){
+                for(int l=0;l<perms.size();l++){
+                    for(int m=0;m<perms.size();m++){
+                        tBlock block=tBlock(hv.at(k),vv.at(k),perms.at(l),perms.at(m));
 
-
-
-
+                        //buidling a string key for the map
+                        std::stringstream ss;
+                        ss<<hv.at(k)<<vv.at(k);
+                        std::string s;
+                        for(auto const& e : perms.at(l)) s += std::to_string(e);                      
+                        for(auto const& e : perms.at(m)) s += std::to_string(e);
+                        ss<<s;
+                      
+                        //adding the tblock to the unordered_map
+                        blockMap.insert( { ss.str(), block });
+                    }
+                }        
+            }
             j++;
-            i++;
-            i=i*(t-1);
+            i=(++i)*(t-1);
         }
-
+       
     }
-
+    
+    //recursive function that creates all permutations of possible offsets(0,-1,1) 
+    //and stores the result in vector<vector<int>> perm
     void fourRussians::permutate(vector<int> posOffset,vector<int> prefix, int length){
         
         //Base case
@@ -65,7 +85,7 @@ fourRussians::fourRussians(int t, string hString, string vString){
             }
         else
             {
-               // One by one add all vectors from posOffsets and recursively call for "length" equals to "length"-1
+               // One by one add all vectors from posOffsets and  make a recursive call with length-1
                 for (int i = 0; i < 3; i++){
                     std::vector<int> tmp;
                     if (prefix.size()!=0){
