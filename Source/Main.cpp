@@ -8,17 +8,14 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include "fourRussians.hpp"
 
-int main()
+using namespace std;
+
+int main(int argc, char* argv[])
 {
-
-    using namespace std;
-
     cout << "Please provide following parameters:" << endl;
     cout << "<inputFile> <tBlockSize>" << endl;
-
-    //cmd params
-    string params;
 
     // inputFile and size extracted from params
     string inputFile;
@@ -28,50 +25,29 @@ int main()
     string firstString;
     string secondString;
 
-    while (true)
-    {
-        //get params form standard input
-        getline(cin, params);
-
-        //split them with delimiter " "
-        istringstream iss(params);
-        vector<string> tokens{istream_iterator<string>{iss}, istream_iterator<string>{}};
-
-        //if number of params is not equal to 2, something is wrong
-        if (tokens.size() != 2)
-        {
-            cout << "Please provide following parameters:" << endl;
-            cout << "<inputFile> <tBlockSize>" << endl;
-            continue;
-        }
-
-        //try to parse params & open inputFile
-        try
-        {
-            inputFile = tokens.at(0);
-            tBlockSize = stoi(tokens.at(1));
-            
-            ifstream inputStream;
-            inputStream.open(inputFile);
-            if(!inputStream.is_open())
-                throw exception();
-
-            inputStream.close();
-        }
-        catch (exception& e)
-        {   
-            cout << "Please provide following parameters:" << endl;
-            cout << "<inputFile> <tBlockSize>" << endl;
-            continue;
-        }
-
-        cout << "Thank you for providing necessary params!" << endl;
-        break;
-    }
+    inputFile=argv[1];
+    tBlockSize=stoi(argv[2]);
 
     //open inputFile and extract two strings
-    ifstream inputStream;
-    inputStream.open(inputFile);
-
-    inputStream.close();
+    ifstream inputStream(inputFile);
+    if(inputStream.is_open()){
+        getline(inputStream,firstString);
+        getline(inputStream,secondString);
+        inputStream.close();
+        firstString.erase(firstString.size()-1,1);
+        secondString.erase(secondString.size()-1,1);
+        cout<<firstString<<endl<<secondString<<endl;
+        fourRussians fr=fourRussians(tBlockSize,firstString,secondString);
+        cout<<"constructor done"<<endl;
+        fr.generateTBlocks();
+        cout<<"generate done"<<endl;
+        cout<<"n blocks "<<fr.blockMap.size()<<endl;;
+        fr.fillDTable();
+        cout<<"fill done"<<endl;
+        cout<<"Min edit distance: "<<fr.getMinDistance()<<endl;
+    }
+    else{
+        cout<<"Cannot open file "<<inputFile<<endl;
+    }
+    return 0;
 }

@@ -4,7 +4,9 @@
 #include <iostream>
 #include "tBlock.hpp"
 #include <unordered_map>
+#include <thread>
 #include <sstream>
+#include <mutex>
 
 using namespace std;
 
@@ -19,16 +21,19 @@ void fourRussians::generateTBlocks(){
 
     //creating permutations of offset vectors (size t) 
     vector<int> posOffset { 0,-1,1 };
-    vector<int> prefix;
-    permutate(posOffset,prefix,t);
+    vector<int> prefixO;
+    permutateO(posOffset,prefixO,t);
+    vector<char> posString { 'A','C','G','T' };
+    vector<char> prefixS;
+    permutateS(posString,prefixS,t);
     
     //ako hocete isprobat ispis permutacija
-    for(int i=0;i<perms.size();i++){
-        for(int j=0;j<perms.at(i).size();j++){
-            //cout<<perms.at(i).at(j);
-        }
-        //cout<<"\n";
-    }
+    // for(int i=0;i<perms.size();i++){
+    //     for(int j=0;j<perms.at(i).size();j++){
+    //         //cout<<perms.at(i).at(j);
+    //     }
+    //     //cout<<"\n";
+    // }
     //broj permutacija
     //cout<<perms.size();
     
@@ -46,25 +51,62 @@ void fourRussians::generateTBlocks(){
     }
     
     //generating tBlocks for every substring and permutation combination
-    for(int k=0; k<hv.size();k++){
-        for(int n=0;n<vv.size();n++){
-            for(int l=0;l<perms.size();l++){
-               for(int m=0;m<perms.size();m++){
-                    tBlock block=tBlock(hv.at(k),vv.at(n),perms.at(l),perms.at(m));
+    // for(int k=0; k<hv.size();k++){
+    //     for(int n=0;n<vv.size();n++){
+    //         for(int l=0;l<perms.size();l++){
+    //            for(int m=0;m<perms.size();m++){
+    //                 tBlock block=tBlock(hv.at(k),vv.at(n),perms.at(l),perms.at(m));
+
+    //                 //buidling a string key for the map
+    //                 stringstream ss;
+    //                 ss<<hv.at(k)<<vv.at(n);
+    //                 string s;
+    //                 for(auto const& e : perms.at(l)) s += to_string(e);                      
+    //                 for(auto const& e : perms.at(m)) s += to_string(e);
+    //                 ss<<s;
+                        
+    //                 //adding the tblock to the unordered_map
+    //                 blockMap.insert( { ss.str(), block });
+    //             }
+    //         } 
+    //     }       
+    // }
+
+
+    vector<thread> workers;
+    mutex semafor;
+    auto thr=[this,&semafor](vector<int> b){
+        for(int i=0;i<permsO.size();i++){
+            for(int j=0;j<permsS.size();j++){
+               for(int k=0;k<permsS.size();k++){
+                   string x(permsS[j].begin(),permsS[j].end());
+                   string y(permsS[k].begin(),permsS[k].end());
+                    tBlock block=tBlock(x,y,b,permsO[i]);
 
                     //buidling a string key for the map
                     stringstream ss;
-                    ss<<hv.at(k)<<vv.at(n);
+                    ss<<x<<y;
                     string s;
-                    for(auto const& e : perms.at(l)) s += to_string(e);                      
-                    for(auto const& e : perms.at(m)) s += to_string(e);
+                    for(auto const& e : b) s += to_string(e);                      
+                    for(auto const& e : permsO[i]) s += to_string(e);
                     ss<<s;
                         
                     //adding the tblock to the unordered_map
+                    semafor.lock();
                     blockMap.insert( { ss.str(), block });
+                    semafor.unlock();
                 }
             } 
-        }       
+        }  
+    };
+    for(int i=0; i<permsO.size();i++){
+        // string tmp(permsS[i].begin(),permsS[i].end());
+        workers.push_back(thread(thr,permsO[i]));
+    }
+
+    cout<<workers.size()<<endl;
+    for(auto &t :workers){
+        t.join();
     }
     //cout<<blockMap.size();
     
@@ -74,30 +116,56 @@ void fourRussians::generateTBlocks(){
 
 //recursive function that creates all permutations of possible offsets(0,-1,1) 
 //and stores the result in vector<vector<int>> perm
-void fourRussians::permutate(vector<int> posOffset,vector<int> prefix, int length){
+void fourRussians::permutateO(vector<int> posOffset,vector<int> prefix, int length){
     
     //Base case
     if (length == 1){
-            for (int j = 0; j < 3; j++){
+            for (int j = 0; j < posOffset.size(); j++){
                 vector<int> tmp;
                 if (prefix.size()!=0){
                     tmp.insert( tmp.end(), prefix.begin(), prefix.end() );
                 }
                 tmp.push_back(posOffset.at(j));
-                perms.push_back(tmp);
+                permsO.push_back(tmp);
             }
-            
-        }
+    }
     else
         {
             // One by one add all vectors from posOffsets and  make a recursive call with length-1
-            for (int i = 0; i < 3; i++){
+            for (int i = 0; i < posOffset.size(); i++){
                 vector<int> tmp;
                 if (prefix.size()!=0){
                     tmp.insert( tmp.end(), prefix.begin(), prefix.end() );
                 }
                 tmp.push_back(posOffset.at(i));
-                permutate(posOffset, tmp ,length - 1);
+                permutateO(posOffset, tmp ,length - 1);
+            }
+        }
+}
+
+void fourRussians::permutateS(vector<char> posString,vector<char> prefix, int length){
+    
+    //Base case
+    if (length == 1){
+            for (int j = 0; j < posString.size(); j++){
+                vector<char> tmp;
+                if (prefix.size()!=0){
+                    tmp.insert( tmp.end(), prefix.begin(), prefix.end() );
+                }
+                tmp.push_back(posString.at(j));
+                permsS.push_back(tmp);
+            }
+        }
+    else
+        {
+            // One by one add all vectors from posString and  make a recursive call with length-1
+            for (int i = 0; i < posString.size(); i++){
+                vector<char> tmp;
+                if (prefix.size()!=0){
+                    tmp.insert( tmp.end(), prefix.begin(), prefix.end() );
+                }
+                tmp.push_back(posString.at(i));
+                permutateS(posString, tmp ,length - 1);
             }
         }
 
