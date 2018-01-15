@@ -41,10 +41,10 @@ int main(int argc, char* argv[])
         cout<<"constructor done"<<endl;
         fr.generateTBlocks();
         cout<<"generate done"<<endl;
-        cout<<"n blocks "<<fr.blockMap.size()<<endl;;
+        //cout<<"n blocks "<<fr.blockMap.size()<<endl;;
         fr.fillDTable();
         cout<<"fill done"<<endl;
-        cout<<"Min edit distance: "<<fr.getMinDistance()<<endl;
+        //cout<<"Min edit distance: "<<fr.getMinDistance()<<endl;
     }
     else{
         cout<<"Cannot open file "<<inputFile<<endl;

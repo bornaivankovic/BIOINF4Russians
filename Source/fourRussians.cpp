@@ -172,7 +172,7 @@ void fourRussians::permutateS(vector<char> posString,vector<char> prefix, int le
 }
 
 //Method for filling the d-table with precomputed values of t-blocks
-void fourRussians::fillDTable(){
+/*void fourRussians::fillDTable(){
     //init d-table
     int n=hString.size()+1;
     dTable.resize(n);
@@ -213,9 +213,71 @@ void fourRussians::printDTable(){
         cout<<s<<endl;
     }
 }
+*/
+void fourRussians::fillDTable(){
+    vector<string> hv;
+    vector<string> vv;
+    dTable.resize(vString.size()/t);
+
+    for(int i=0;i<dTable.size();i++){
+        dTable[i].resize(hString.size()/t);
+    }
+    //creating substrings of initial strings
+    //there are two for loops in case string aren't the same length 
+    for(int i=0;i<hString.size();i+=t){
+        hv.push_back(hString.substr(i,t));
+    }
+
+    for(int i=0;i<vString.size();i+=t){
+        vv.push_back(vString.substr(i,t));
+    }
+
+
+    //for every substring calculate tBlock and fill D-table
+    for(int i=0;i<vv.size();i++){
+        for(int j=0;j<hv.size();j++){
+            string b="";
+            string c="";
+            for(int k=0;k<t;k++){
+                    b+="1";
+                    c+="1";
+            }
+            if(i==0 & j!=0){
+                c="";
+                for(auto const& e : dTable[i][j-1].vOffsets) c += to_string(e);
+            }
+            if(i!=0 & j==0){
+                b="";
+                for(auto const& e : dTable[i-1][j].hOffsets) b += to_string(e);   
+            }
+            if(i!=0 & j!=0){
+                c="";b="";
+                for(auto const& e : dTable[i-1][j].hOffsets) b += to_string(e);
+                for(auto const& e : dTable[i][j-1].vOffsets) c += to_string(e);
+            }
+            tBlock currentBlock=blockMap[hv.at(j)+vv.at(i)+b+c];
+            dTable[i][j]=currentBlock;
+        }
+    }
+
+    printDTable();
+
+    
+}
+
+void fourRussians::printDTable(){
+    for(int i=0; i<dTable.size();i++){
+        for(int j=0;j<dTable.size();j++){
+            string s="";
+            for(auto const& e : dTable[i][j].vOffsets) s += to_string(e);
+            cout<<s;
+        }
+    }
+}
+
 
 //Get min string edit distance
 int fourRussians::getMinDistance(){
     int n=dTable.size()-1;
-    return dTable[n][n];
+    //return dTable[n][n];
 }
