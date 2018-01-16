@@ -3,7 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include "tBlock.hpp"
-
+#include "Hash.hpp"
 
 using namespace std;
 
@@ -12,7 +12,9 @@ class fourRussians{
         int t;
         string hString;
         string vString;
-        unordered_map<string,vector<int>> permsO;
+      
+        
+        unordered_map<vector<int>,string,VectorHash> permsO;
         //vector<vector<int>> permsO;
         string *permsSP;
         //vector<vector<char>> permsS;
@@ -30,5 +32,9 @@ class fourRussians{
         void fillDTable();
         void printDTable();
         int getMinDistance();
+    
+        
 };
+
+ 
 
