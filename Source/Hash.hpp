@@ -9,7 +9,7 @@ using namespace std;
 
 struct VectorHash {
     size_t operator()(vector<int> v) const noexcept {
-                int n;
+                int n=0;
                 int counter=v.size();
                 int minusOne=2;
                 for(int i=0;i<v.size(); i++){

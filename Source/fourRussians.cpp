@@ -23,7 +23,6 @@ fourRussians::fourRussians(int t, string hString, string vString){
     for(int i=0;i<vString.size();i+=t){
         vSubS.push_back(vString.substr(i,t));
     }
-
         
 }
 
@@ -47,6 +46,7 @@ void fourRussians::generateTBlocks(){
     vector<int> posOffset { 0,-1,1 };
     vector<int> prefixO;
     permutateO(posOffset,prefixO,t);
+
     const char posString[]={ 'A','C','G','T' };
     int counter=0;
     int* k=&counter;
@@ -111,17 +111,18 @@ void fourRussians::generateTBlocks(){
                         
                     //adding the tblock to the unordered_map
                     semafor.lock();
-                    blockMap.insert( { x+y+el2.second+el1.second, block });
+                    string s=x+y+el2.second+el1.second;
+                    blockMap.insert( { s, block });
                     //blockMap.insert( { ss.str(), block });
                     semafor.unlock();
                 }
             } 
         }  
     };
-
     for(pair<vector<int>,string> element : permsO){
         workers.push_back(thread(thr,element));
     }
+    
 
     /*
     for(int i=0; i<permsO.size();i++){
@@ -283,7 +284,7 @@ void fourRussians::fillDTable(){
     //for every substring calculate tBlock and fill D-table
     tBlock currentBlock;
     for(int i=0;i<vSubS.size();i++){
-        vector<string> tmp;
+        vector<tBlock> tmp;
         for(int j=0;j<hSubS.size();j++){
             string b="";
             string c="";
@@ -302,21 +303,24 @@ void fourRussians::fillDTable(){
                 b="";
                 // for(auto const& e : blockMap[dTable[i-1][j]].hOffsets) b += to_string(e);
                 //b=intVecToStr(blockMap[dTable[i-1][j]].hOffsets);
-                b=permsO[blockMap[dTable[i-1][j]].hOffsets];
+                b=permsO[dTable[i-1][j].hOffsets];
             }
             if(i!=0 & j!=0){
                 c="";b="";
                 // for(auto const& e : blockMap[dTable[i-1][j]].hOffsets) b += to_string(e);
                 //b=intVecToStr(blockMap[dTable[i-1][j]].hOffsets);
-                b=permsO[blockMap[dTable[i-1][j]].hOffsets];
+                b=permsO[dTable[i-1][j].hOffsets];
                 // for(auto const& e : dTable[i][j-1].vOffsets) c += to_string(e);
                 // for(auto const& e : currentBlock.vOffsets) c+=to_string(e);
                 //c=intVecToStr(currentBlock.vOffsets);
                 c=permsO[currentBlock.vOffsets];
             }
             string s=hSubS[j]+vSubS[i]+b+c;
+            //cout<<s;
             currentBlock=blockMap[s];
-            tmp.push_back(s);
+            //cout<<"\n";
+            
+            tmp.push_back(currentBlock);
         }
         dTable.push_back(tmp);
     }
@@ -342,7 +346,7 @@ void fourRussians::printDTable(){
 int fourRussians::getMinDistance(){
     int tmp=0;
     for(int i=0;i<dTable.back().size();i++){
-        for(auto &n:blockMap[dTable.back()[i]].hOffsets){
+        for(auto &n:dTable.back()[i].hOffsets){
             tmp+=n;
         }
     }
