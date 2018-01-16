@@ -14,6 +14,23 @@ fourRussians::fourRussians(int t, string hString, string vString){
     this->t=t;  
     this->hString=hString;
     this->vString=vString;
+
+    for(int i=0;i<hString.size();i+=t){
+        hSubS.push_back(hString.substr(i,t));
+    }
+    for(int i=0;i<vString.size();i+=t){
+        vSubS.push_back(vString.substr(i,t));
+    }
+}
+
+string intVecToStr(vector<int>& vec){
+    string s;
+    for(int i=0;i<vec.size();i++){
+        if (vec[i]==0) s+="0";
+        if (vec[i]==1) s+="1";
+        if (vec[i]==-1) s+="-1";
+    }
+    return s;
 }
 
 //Method for generating and storing tBlocks
@@ -39,16 +56,16 @@ void fourRussians::generateTBlocks(){
     
 
     //creating t size vectors of input strings and generating tBlocks 
-    int i=0;
-    int j=0;
-    vector<string> hv;
-    vector<string> vv;
+    // int i=0;
+    // int j=0;
+    // vector<string> hv;
+    // vector<string> vv;
     
     //creating vectors containing substrings of initial strings 
-    for(int i=0;i<vString.size();i+=t){
-        hv.push_back(hString.substr(i,t));
-        vv.push_back(vString.substr(i,t));
-    }
+    // for(int i=0;i<vString.size();i+=t){
+    //     hv.push_back(hString.substr(i,t));
+    //     vv.push_back(vString.substr(i,t));
+    // }
     
     //generating tBlocks for every substring and permutation combination
     // for(int k=0; k<hv.size();k++){
@@ -87,8 +104,10 @@ void fourRussians::generateTBlocks(){
                     stringstream ss;
                     ss<<x<<y;
                     string s;
-                    for(auto const& e : b) s += to_string(e);                      
-                    for(auto const& e : permsO[i]) s += to_string(e);
+                    // for(auto const& e : b) s += to_string(e);                      
+                    // for(auto const& e : permsO[i]) s += to_string(e);
+                    s+=intVecToStr(b);
+                    s+=intVecToStr(permsO[i]);
                     ss<<s;
                         
                     //adding the tblock to the unordered_map
@@ -214,28 +233,33 @@ void fourRussians::printDTable(){
     }
 }
 */
-void fourRussians::fillDTable(){
-    vector<string> hv;
-    vector<string> vv;
-    dTable.resize(vString.size()/t);
 
-    for(int i=0;i<dTable.size();i++){
-        dTable[i].resize(hString.size()/t);
-    }
+
+
+void fourRussians::fillDTable(){
+    // vector<string> hv;
+    // vector<string> vv;
+    // dTable.resize(vString.size()/t);
+
+    // for(int i=0;i<dTable.size();i++){
+    //     dTable[i].resize(hString.size()/t);
+    // }
     //creating substrings of initial strings
     //there are two for loops in case string aren't the same length 
-    for(int i=0;i<hString.size();i+=t){
-        hv.push_back(hString.substr(i,t));
-    }
+    // for(int i=0;i<hString.size();i+=t){
+    //     hv.push_back(hString.substr(i,t));
+    // }
 
-    for(int i=0;i<vString.size();i+=t){
-        vv.push_back(vString.substr(i,t));
-    }
+    // for(int i=0;i<vString.size();i+=t){
+    //     vv.push_back(vString.substr(i,t));
+    // }
 
 
     //for every substring calculate tBlock and fill D-table
-    for(int i=0;i<vv.size();i++){
-        for(int j=0;j<hv.size();j++){
+    tBlock currentBlock;
+    for(int i=0;i<vSubS.size();i++){
+        vector<string> tmp;
+        for(int j=0;j<hSubS.size();j++){
             string b="";
             string c="";
             for(int k=0;k<t;k++){
@@ -244,40 +268,55 @@ void fourRussians::fillDTable(){
             }
             if(i==0 & j!=0){
                 c="";
-                for(auto const& e : dTable[i][j-1].vOffsets) c += to_string(e);
+                // for(auto const& e : dTable[i][j-1].vOffsets) c += to_string(e);
+                // for(auto const& e : currentBlock.vOffsets) c+=to_string(e);
+                c=intVecToStr(currentBlock.vOffsets);
             }
             if(i!=0 & j==0){
                 b="";
-                for(auto const& e : dTable[i-1][j].hOffsets) b += to_string(e);   
+                // for(auto const& e : blockMap[dTable[i-1][j]].hOffsets) b += to_string(e);
+                b=intVecToStr(blockMap[dTable[i-1][j]].hOffsets);
             }
             if(i!=0 & j!=0){
                 c="";b="";
-                for(auto const& e : dTable[i-1][j].hOffsets) b += to_string(e);
-                for(auto const& e : dTable[i][j-1].vOffsets) c += to_string(e);
+                // for(auto const& e : blockMap[dTable[i-1][j]].hOffsets) b += to_string(e);
+                b=intVecToStr(blockMap[dTable[i-1][j]].hOffsets);
+                // for(auto const& e : dTable[i][j-1].vOffsets) c += to_string(e);
+                // for(auto const& e : currentBlock.vOffsets) c+=to_string(e);
+                c=intVecToStr(currentBlock.vOffsets);
             }
-            tBlock currentBlock=blockMap[hv.at(j)+vv.at(i)+b+c];
-            dTable[i][j]=currentBlock;
+            string s=hSubS[j]+vSubS[i]+b+c;
+            currentBlock=blockMap[s];
+            tmp.push_back(s);
         }
+        dTable.push_back(tmp);
     }
 
-    printDTable();
+    // printDTable();
 
     
 }
 
+
 void fourRussians::printDTable(){
-    for(int i=0; i<dTable.size();i++){
-        for(int j=0;j<dTable.size();j++){
-            string s="";
-            for(auto const& e : dTable[i][j].vOffsets) s += to_string(e);
-            cout<<s;
-        }
-    }
+    // for(int i=0; i<dTable.size();i++){
+    //     for(int j=0;j<dTable.size();j++){
+    //         string s="";
+    //         for(auto const& e : dTable[i][j].vOffsets) s += to_string(e);
+    //         cout<<s;
+    //     }
+    // }
 }
 
 
 //Get min string edit distance
 int fourRussians::getMinDistance(){
-    int n=dTable.size()-1;
+    int tmp=0;
+    for(int i=0;i<dTable.back().size();i++){
+        for(auto &n:blockMap[dTable.back()[i]].hOffsets){
+            tmp+=n;
+        }
+    }
+    return tmp+hString.size();
     //return dTable[n][n];
 }

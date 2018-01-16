@@ -15,7 +15,9 @@ class fourRussians{
         vector<vector<int>> permsO;
         vector<vector<char>> permsS;
         unordered_map<string, tBlock> blockMap;
-        vector< vector<tBlock> > dTable;
+        vector< vector<string> > dTable;
+        vector<string> hSubS;
+        vector<string> vSubS;
         
 
         fourRussians(int t, string hstring, string vstring); 
