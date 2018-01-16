@@ -7,6 +7,7 @@
 #include <thread>
 #include <sstream>
 #include <mutex>
+#include <cmath>
 
 using namespace std;
 
@@ -21,6 +22,7 @@ fourRussians::fourRussians(int t, string hString, string vString){
     for(int i=0;i<vString.size();i+=t){
         vSubS.push_back(vString.substr(i,t));
     }
+        
 }
 
 string intVecToStr(vector<int>& vec){
@@ -36,23 +38,18 @@ string intVecToStr(vector<int>& vec){
 //Method for generating and storing tBlocks
 void fourRussians::generateTBlocks(){
 
+    int size= pow(4,t);
+    permsSP= new string[size];
+
     //creating permutations of offset vectors (size t) 
     vector<int> posOffset { 0,-1,1 };
     vector<int> prefixO;
     permutateO(posOffset,prefixO,t);
-    vector<char> posString { 'A','C','G','T' };
-    vector<char> prefixS;
-    permutateS(posString,prefixS,t);
-    
-    //ako hocete isprobat ispis permutacija
-    // for(int i=0;i<perms.size();i++){
-    //     for(int j=0;j<perms.at(i).size();j++){
-    //         //cout<<perms.at(i).at(j);
-    //     }
-    //     //cout<<"\n";
-    // }
-    //broj permutacija
-    //cout<<perms.size();
+    const char posString[]={ 'A','C','G','T' };
+    int counter=0;
+    int* k=&counter;
+    permutateS(posString,"",4,t,k);
+   
     
 
     //creating t size vectors of input strings and generating tBlocks 
@@ -92,12 +89,12 @@ void fourRussians::generateTBlocks(){
 
     vector<thread> workers;
     mutex semafor;
-    auto thr=[this,&semafor](vector<int> b){
+    auto thr=[this,&semafor,size](vector<int> b){
         for(int i=0;i<permsO.size();i++){
-            for(int j=0;j<permsS.size();j++){
-               for(int k=0;k<permsS.size();k++){
-                   string x(permsS[j].begin(),permsS[j].end());
-                   string y(permsS[k].begin(),permsS[k].end());
+            for(int j=0;j<size;j++){
+               for(int k=0;k<size;k++){
+                   string x=*(permsSP+j);
+                   string y=*(permsSP+k);
                     tBlock block=tBlock(x,y,b,permsO[i]);
 
                     //buidling a string key for the map
@@ -128,8 +125,8 @@ void fourRussians::generateTBlocks(){
         t.join();
     }
     //cout<<blockMap.size();
-    
-    
+
+    delete[] permsSP;
     
 }
 
@@ -162,6 +159,7 @@ void fourRussians::permutateO(vector<int> posOffset,vector<int> prefix, int leng
         }
 }
 
+/*
 void fourRussians::permutateS(vector<char> posString,vector<char> prefix, int length){
     
     //Base case
@@ -172,7 +170,7 @@ void fourRussians::permutateS(vector<char> posString,vector<char> prefix, int le
                     tmp.insert( tmp.end(), prefix.begin(), prefix.end() );
                 }
                 tmp.push_back(posString.at(j));
-                permsS.push_back(tmp);
+                permsSP.push_back(tmp);
             }
         }
     else
@@ -187,8 +185,26 @@ void fourRussians::permutateS(vector<char> posString,vector<char> prefix, int le
                 permutateS(posString, tmp ,length - 1);
             }
         }
+}*/
 
+void fourRussians::permutateS(const char str[],string prefix,const int n, const int lenght, int* k)
+{
+        if (lenght == 1)
+            {
+                for (int j = 0; j < n; j++){ 
+                    *(permsSP + *k)=prefix + str[j];
+                    (*k)++;
+                }
+            }
+        else
+            {
+                for (int i = 0; i < n; i++){
+                    permutateS(str, prefix + str[i], n, lenght - 1, k);
+                
+                }
+            }
 }
+
 
 //Method for filling the d-table with precomputed values of t-blocks
 /*void fourRussians::fillDTable(){

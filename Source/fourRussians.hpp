@@ -13,7 +13,8 @@ class fourRussians{
         string hString;
         string vString;
         vector<vector<int>> permsO;
-        vector<vector<char>> permsS;
+        string *permsSP;
+        //vector<vector<char>> permsS;
         unordered_map<string, tBlock> blockMap;
         vector< vector<string> > dTable;
         vector<string> hSubS;
@@ -23,7 +24,7 @@ class fourRussians{
         fourRussians(int t, string hstring, string vstring); 
 
         void permutateO(vector<int> posOffset,vector<int> prefix, int length);
-        void permutateS(vector<char> posOffset,vector<char> prefix, int length);
+        void permutateS(const char str[],string prefix,const int n, const int lenght, int* k);
         void generateTBlocks();
         void fillDTable();
         void printDTable();
