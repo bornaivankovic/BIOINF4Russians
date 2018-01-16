@@ -89,37 +89,44 @@ void fourRussians::generateTBlocks(){
 
     vector<thread> workers;
     mutex semafor;
-    auto thr=[this,&semafor,size](vector<int> b){
-        for(int i=0;i<permsO.size();i++){
+    auto thr=[this,&semafor,size](pair<string,vector<int>> el2){
+        for(pair<string,vector<int>> el1 : permsO){
             for(int j=0;j<size;j++){
                for(int k=0;k<size;k++){
-                   string x=*(permsSP+j);
-                   string y=*(permsSP+k);
-                    tBlock block=tBlock(x,y,b,permsO[i]);
+                    string x=*(permsSP+j);
+                    string y=*(permsSP+k);
+                    tBlock block=tBlock(x,y,el2.second,el1.second);
 
                     //buidling a string key for the map
-                    stringstream ss;
-                    ss<<x<<y;
-                    string s;
+                    //stringstream ss;
+                    //ss<<x<<y;
+                    //string s;
                     // for(auto const& e : b) s += to_string(e);                      
                     // for(auto const& e : permsO[i]) s += to_string(e);
-                    s+=intVecToStr(b);
-                    s+=intVecToStr(permsO[i]);
-                    ss<<s;
+                    //s+=intVecToStr(b);
+                    //s+=intVecToStr(permsO[i]);
+                    //ss<<s;
                         
                     //adding the tblock to the unordered_map
                     semafor.lock();
-                    blockMap.insert( { ss.str(), block });
+                    blockMap.insert( { x+y+el2.first+el1.first, block });
+                    //blockMap.insert( { ss.str(), block });
                     semafor.unlock();
                 }
             } 
         }  
     };
+
+    for(pair<string,vector<int>> element : permsO){
+        workers.push_back(thread(thr,element));
+    }
+
+    /*
     for(int i=0; i<permsO.size();i++){
         // string tmp(permsS[i].begin(),permsS[i].end());
         workers.push_back(thread(thr,permsO[i]));
     }
-
+    */
     cout<<workers.size()<<endl;
     for(auto &t :workers){
         t.join();
@@ -142,7 +149,7 @@ void fourRussians::permutateO(vector<int> posOffset,vector<int> prefix, int leng
                     tmp.insert( tmp.end(), prefix.begin(), prefix.end() );
                 }
                 tmp.push_back(posOffset.at(j));
-                permsO.push_back(tmp);
+                permsO.insert({intVecToStr(tmp),tmp});
             }
     }
     else

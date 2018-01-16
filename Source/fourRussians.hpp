@@ -12,7 +12,8 @@ class fourRussians{
         int t;
         string hString;
         string vString;
-        vector<vector<int>> permsO;
+        unordered_map<string,vector<int>> permsO;
+        //vector<vector<int>> permsO;
         string *permsSP;
         //vector<vector<char>> permsS;
         unordered_map<string, tBlock> blockMap;
