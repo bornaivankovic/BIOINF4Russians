@@ -12,42 +12,60 @@
 
 using namespace std;
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-    cout << "Please provide following parameters:" << endl;
-    cout << "<inputFile> <tBlockSize>" << endl;
-
-    // inputFile and size extracted from params
     string inputFile;
+    string outputFile;
     int tBlockSize;
+
+    //check the number of params
+    if (argc != 4)
+    {
+        cout << argc;
+        cout << "This program requires 3 arguments: <inputFile> <outputFile> <tBlockSize>";
+        return 0;
+    }
+
+    // inputFile, outputFile and tBlockSize extracted from params
+    try
+    {
+        inputFile = argv[1];
+        outputFile = argv[2];
+        tBlockSize = stoi(argv[3]);
+    }
+    catch (std::invalid_argument &e)
+    {
+        cout << "T-Block size must be a number!";
+        return 0;
+    }
 
     //strings for algorithm extracted form inputFIle
     string firstString;
     string secondString;
 
-    inputFile=argv[1];
-    tBlockSize=stoi(argv[2]);
-
     //open inputFile and extract two strings
     ifstream inputStream(inputFile);
-    if(inputStream.is_open()){
-        getline(inputStream,firstString);
-        getline(inputStream,secondString);
+    if (inputStream.is_open())
+    {
+
+        getline(inputStream, firstString);
+        getline(inputStream, secondString);
+
         inputStream.close();
-        firstString.erase(firstString.size()-1,1);
-        secondString.erase(secondString.size()-1,1);
-        cout<<firstString<<endl<<secondString<<endl;
-        fourRussians fr=fourRussians(tBlockSize,firstString,secondString);
-        cout<<"constructor done"<<endl;
+
+        //remove \n 
+        firstString.erase(firstString.size() - 1, 1);
+        secondString.erase(secondString.size() - 1, 1);
+
+        fourRussians fr = fourRussians(tBlockSize, firstString, secondString, outputFile);
         fr.generateTBlocks();
-        cout<<"generate done"<<endl;
-        //cout<<"n blocks "<<fr.blockMap.size()<<endl;;
         fr.fillDTable();
-        cout<<"fill done"<<endl;
-        cout<<"Min edit distance: "<<fr.getMinDistance()<<endl;
+        cout << "Min edit distance: " << fr.getMinDistance() << endl;
     }
-    else{
-        cout<<"Cannot open file "<<inputFile<<endl;
+    else
+    {
+        cout << "Cannot open file " << inputFile << endl;
     }
+
     return 0;
 }
