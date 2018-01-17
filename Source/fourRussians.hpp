@@ -12,7 +12,7 @@ class fourRussians{
         int t;
         string hString;
         string vString;
-      
+        string outputFile;
         
         unordered_map<vector<int>,string,VectorHash> permsO;
         //vector<vector<int>> permsO;
@@ -24,7 +24,7 @@ class fourRussians{
         vector<string> vSubS;
         
 
-        fourRussians(int t, string hstring, string vstring); 
+        fourRussians(int t, string hstring, string vstring, string outputFile); 
 
         void permutateO(vector<int> posOffset,vector<int> prefix, int length);
         void permutateS(const char str[],string prefix,const int n, const int lenght, int* k);

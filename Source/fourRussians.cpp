@@ -14,10 +14,11 @@
 
 using namespace std;
 
-fourRussians::fourRussians(int t, string hString, string vString){
+fourRussians::fourRussians(int t, string hstring, string vstring, string outputFile){
     this->t=t;  
     this->hString=hString;
     this->vString=vString;
+    this->outputFile=outputFile;
 
     for(int i=0;i<hString.size();i+=t){
         hSubS.push_back(hString.substr(i,t));
