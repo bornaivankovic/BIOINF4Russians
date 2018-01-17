@@ -69,9 +69,9 @@ int main(int argc, char *argv[])
     fr.generateTBlocks();
     
     auto finish = chrono::high_resolution_clock::now();
-    chrono::duration<double> elapsed = finish - start;
+    chrono::duration<double> elapsed1 = finish - start;
     cout << "T-Blocks generated!" << endl;
-    cout << "Duration of T-Blocks generation: " << elapsed.count() << " s\n";
+    cout << "Duration of T-Blocks generation: " << elapsed1.count() << " s\n";
     
     cout << "Filling D-Table:" << endl;
     start = chrono::high_resolution_clock::now();
@@ -79,13 +79,17 @@ int main(int argc, char *argv[])
     fr.fillDTable();
     
     finish = chrono::high_resolution_clock::now();
-    elapsed = finish - start;
+    chrono::duration<double> elapsed2 = finish - start;
     cout << "D-Table filled!" << endl;
-    cout << "Duration of D-Table filling: " << elapsed.count() << " s\n";
+    cout << "Duration of D-Table filling: " << elapsed2.count() << " s\n";
 
     cout << "Min edit distance: " << fr.getMinDistance() << endl;
     double memory = fr.dTable.size()*fr.dTable[0].size()*sizeof(tBlock*)
         + fr.blockMap.size() * sizeof(tBlock);
     cout << "Memmory needed: " << ((memory / 1024) / 1024) << " MB" << endl;
+
+    chrono::duration<double> elapsed = elapsed1 + elapsed2;
+    cout << "Elapsed time: " << elapsed.count() << " s\n";
+    
     return 0;
 }

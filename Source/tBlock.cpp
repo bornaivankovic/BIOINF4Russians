@@ -33,7 +33,8 @@ tBlock::tBlock(const string& x,const string& y,vector<int>& b,vector<int>& c){
             }
             v2=tmpBlock[i][j-1]+1;
             v3=tmpBlock[i-1][j]+1;
-            tmpBlock[i][j]=min({v1,v2,v3});
+            tmpBlock[i][j] = min({v1,v2,v3});
+            
         }
     }
 
