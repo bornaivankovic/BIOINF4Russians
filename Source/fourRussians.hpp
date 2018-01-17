@@ -19,7 +19,7 @@ class fourRussians{
         string *permsSP;
         //vector<vector<char>> permsS;
         unordered_map<string, tBlock> blockMap;
-        vector< vector<tBlock> > dTable;
+        vector< vector<tBlock*> > dTable;
         vector<string> hSubS;
         vector<string> vSubS;
         

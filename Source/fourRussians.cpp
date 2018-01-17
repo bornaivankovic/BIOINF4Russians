@@ -184,30 +184,26 @@ void fourRussians::fillDTable(){
                 b=c=string(t,'1');
             }
             else{
-                b=permsO[dTable[i-1][i].hOffsets];
-                c=permsO[dTable[i][i-1].vOffsets];
+                b=permsO[dTable[i-1][i]->hOffsets];
+                c=permsO[dTable[i][i-1]->vOffsets];
             }
-            // l.lock();
-            dTable[i][i]=blockMap[x+y+b+c];
-            // l.unlock();
+            dTable[i][i]=&blockMap[x+y+b+c];
             obj.signalCompetionT3();
         }
     };
     auto thrRow=[this,&obj,&l](){
         for(int i=0;i<vSubS.size();i++){
             obj.waitForCompetionT3(0);
-            tBlock prevBlock=dTable[i][i];
+            tBlock* prevBlock=dTable[i][i];
             for(int j=i+1;j<hSubS.size();j++){
-                string x=hSubS[j],y=vSubS[i],b,c=permsO[prevBlock.vOffsets];
+                string x=hSubS[j],y=vSubS[i],b,c=permsO[prevBlock->vOffsets];
                 if(i==0){
                     b=string(t,'1');
                 }
                 else{
-                    b=permsO[dTable[i-1][j].hOffsets];
+                    b=permsO[dTable[i-1][j]->hOffsets];
                 }
-                // l.lock();
-                dTable[i][j]=blockMap[x+y+b+c];
-                // l.unlock();
+                dTable[i][j]=&blockMap[x+y+b+c];
                 prevBlock=dTable[i][j];
             }
             obj.signalCompetionT1T2(0);
@@ -216,18 +212,16 @@ void fourRussians::fillDTable(){
     auto thrCol=[this,&obj,&l](){
         for(int i=0;i<hSubS.size();i++){
             obj.waitForCompetionT3(1);
-            tBlock prevBlock=dTable[i][i];
+            tBlock *prevBlock=dTable[i][i];
             for(int j=i+1;j<vSubS.size();j++){
-                string x=hSubS[i],y=vSubS[j],b=permsO[prevBlock.hOffsets],c;
+                string x=hSubS[i],y=vSubS[j],b=permsO[prevBlock->hOffsets],c;
                 if(i==0){
                     c=string(t,'1');
                 }
                 else{
-                    c=permsO[dTable[j][i-1].vOffsets];
+                    c=permsO[dTable[j][i-1]->vOffsets];
                 }
-                // l.lock();
-                dTable[j][i]=blockMap[x+y+b+c];
-                // l.unlock();
+                dTable[j][i]=&blockMap[x+y+b+c];
                 prevBlock=dTable[j][i];
             }
             obj.signalCompetionT1T2(1);
@@ -260,7 +254,7 @@ void fourRussians::printDTable(){
 int fourRussians::getMinDistance(){
     int tmp=0;
     for(int i=0;i<dTable.back().size();i++){
-        for(auto &n:dTable.back()[i].hOffsets){
+        for(auto &n:dTable.back()[i]->hOffsets){
             tmp+=n;
         }
     }
