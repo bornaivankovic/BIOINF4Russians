@@ -255,6 +255,51 @@ void fourRussians::printDTable(){
     // }
 }
 
+void fourRussians::makeEditScript(){
+
+    int x = hString.length();
+    int y = vString.length();
+    int xBlocks = (int)x/t;
+    int yBlocks = (int)y/t;
+
+    string outFirst;
+    string outSecond;
+    string operations;
+
+    tBlock *block = dTable[xBlocks - 1][yBlocks - 1];
+    vector<int> v;
+    vector<int> h;
+
+    while(minDistance > 0){
+        v = block->vOffsets;
+        h = block->hOffsets;
+
+        if(v[t-1] == h[t-1] && hString[x - 1] != vString[y - 1]){
+            for(int i = t - 1; i == -1; i--){
+                minDistance -= v[i];
+            }
+            xBlocks--;
+        } else if(v[t-1] > h[t-1]){
+            for(int i = t - 1; i == -1; i--){
+                minDistance -= v[i];
+            }
+            xBlocks--;
+        }else if( v[t-1] < h[t-1]){
+            for(int i = t - 1; i == -1; i--){
+                minDistance -= h[i];
+            }
+            yBlocks--;
+        } else {
+            xBlocks--;
+            yBlocks--;
+        }
+        x -= t;
+        y -= t;
+        block = dTable[xBlocks - 1][yBlocks - 1];
+
+    }
+
+}
 
 //Get min string edit distance
 int fourRussians::getMinDistance(){
@@ -264,6 +309,7 @@ int fourRussians::getMinDistance(){
             tmp+=n;
         }
     }
+    minDistance = tmp + hString.size();
     return tmp+hString.size();
 }
 

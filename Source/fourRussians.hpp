@@ -13,6 +13,7 @@ class fourRussians{
         string hString;
         string vString;
         string outputFile;
+        int minDistance;
         
         unordered_map<vector<int>,string,VectorHash> permsO;
         //vector<vector<int>> permsO;
@@ -31,6 +32,7 @@ class fourRussians{
         void generateTBlocks();
         void fillDTable();
         void printDTable();
+        void makeEditScript();
         int getMinDistance();
     
         

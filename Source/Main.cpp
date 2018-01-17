@@ -64,10 +64,8 @@ int main(int argc, char *argv[])
     fourRussians fr = fourRussians(tBlockSize, firstString, secondString, outputFile);
 
     cout << "Generating T-Blocks:" << endl;
-    auto start = chrono::high_resolution_clock::now();
-    
+    auto start = chrono::high_resolution_clock::now();  
     fr.generateTBlocks();
-    
     auto finish = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed1 = finish - start;
     cout << "T-Blocks generated!" << endl;
@@ -75,21 +73,28 @@ int main(int argc, char *argv[])
     
     cout << "Filling D-Table:" << endl;
     start = chrono::high_resolution_clock::now();
-    
     fr.fillDTable();
-    
     finish = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed2 = finish - start;
     cout << "D-Table filled!" << endl;
     cout << "Duration of D-Table filling: " << elapsed2.count() << " s\n";
 
     cout << "Min edit distance: " << fr.getMinDistance() << endl;
+    
+    cout << "Making edit script:" << endl;
+    start = chrono::high_resolution_clock::now();
+    fr.makeEditScript();
+    finish = chrono::high_resolution_clock::now();
+    chrono::duration<double> elapsed3 = finish - start;
+    cout << "Edit script made!" << endl;
+    cout << "Duration of script making: " << elapsed3.count() << " s\n";
+
+
+    chrono::duration<double> elapsed = elapsed1 + elapsed2 + elapsed3;
+    cout << "Elapsed time: " << elapsed.count() << " s\n";
     double memory = fr.dTable.size()*fr.dTable[0].size()*sizeof(tBlock*)
         + fr.blockMap.size() * sizeof(tBlock);
     cout << "Memmory needed: " << ((memory / 1024) / 1024) << " MB" << endl;
 
-    chrono::duration<double> elapsed = elapsed1 + elapsed2;
-    cout << "Elapsed time: " << elapsed.count() << " s\n";
-    
     return 0;
 }
