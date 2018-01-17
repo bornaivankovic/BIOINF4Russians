@@ -80,7 +80,7 @@ void fourRussians::generateTBlocks(){
     
 
     
-    cout<<workers.size()<<endl;
+    //cout<<workers.size()<<endl;
     for(auto &t :workers){
         t.join();
     }

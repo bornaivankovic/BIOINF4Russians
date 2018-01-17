@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include "fourRussians.hpp"
+#include <chrono>
 
 using namespace std;
 
@@ -50,22 +51,41 @@ int main(int argc, char *argv[])
 
         getline(inputStream, firstString);
         getline(inputStream, secondString);
-
         inputStream.close();
-
+            
         //remove \n 
         firstString.erase(firstString.size() - 1, 1);
         secondString.erase(secondString.size() - 1, 1);
-
-        fourRussians fr = fourRussians(tBlockSize, firstString, secondString, outputFile);
-        fr.generateTBlocks();
-        fr.fillDTable();
-        cout << "Min edit distance: " << fr.getMinDistance() << endl;
     }
     else
     {
         cout << "Cannot open file " << inputFile << endl;
     }
+    fourRussians fr = fourRussians(tBlockSize, firstString, secondString, outputFile);
 
+    cout << "Generating T-Blocks:" << endl;
+    auto start = chrono::high_resolution_clock::now();
+    
+    fr.generateTBlocks();
+    
+    auto finish = chrono::high_resolution_clock::now();
+    chrono::duration<double> elapsed = finish - start;
+    cout << "T-Blocks generated!" << endl;
+    cout << "Duration of T-Blocks generation: " << elapsed.count() << " s\n";
+    
+    cout << "Filling D-Table:" << endl;
+    start = chrono::high_resolution_clock::now();
+    
+    fr.fillDTable();
+    
+    finish = chrono::high_resolution_clock::now();
+    elapsed = finish - start;
+    cout << "D-Table filled!" << endl;
+    cout << "Duration of D-Table filling: " << elapsed.count() << " s\n";
+
+    cout << "Min edit distance: " << fr.getMinDistance() << endl;
+    double memory = fr.dTable.size()*fr.dTable[0].size()*sizeof(tBlock)
+        + fr.blockMap.size() * sizeof(tBlock);
+    cout << "Memmory needed: " << ((memory / 1024) / 1024) << " MB" << endl;
     return 0;
 }
