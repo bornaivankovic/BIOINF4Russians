@@ -15,7 +15,13 @@
 using namespace std;
 
 fourRussians::fourRussians(int t, string hString, string vString, string outputFile){
-    this->t=t;  
+    this->t=t;
+    for(int i=hString.size()%t;i>0;i--){
+        hString.erase(hString.size()-1,1);
+    }
+    for(int i=vString.size()%t;i>0;i--){
+        vString.erase(vString.size()-1,1);
+    }
     this->hString=hString;
     this->vString=vString;
     this->outputFile=outputFile;

@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     cout << "Duration of D-Table filling: " << elapsed.count() << " s\n";
 
     cout << "Min edit distance: " << fr.getMinDistance() << endl;
-    double memory = fr.dTable.size()*fr.dTable[0].size()*sizeof(tBlock)
+    double memory = fr.dTable.size()*fr.dTable[0].size()*sizeof(tBlock*)
         + fr.blockMap.size() * sizeof(tBlock);
     cout << "Memmory needed: " << ((memory / 1024) / 1024) << " MB" << endl;
     return 0;
