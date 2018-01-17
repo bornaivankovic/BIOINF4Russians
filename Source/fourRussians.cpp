@@ -8,6 +8,8 @@
 #include <sstream>
 #include <mutex>
 #include <cmath>
+#include <atomic>
+#include <condition_variable>
 
 
 using namespace std;
@@ -52,43 +54,7 @@ void fourRussians::generateTBlocks(){
     int* k=&counter;
     permutateS(posString,"",4,t,k);
    
-    
-
-    //creating t size vectors of input strings and generating tBlocks 
-    // int i=0;
-    // int j=0;
-    // vector<string> hv;
-    // vector<string> vv;
-    
-    //creating vectors containing substrings of initial strings 
-    // for(int i=0;i<vString.size();i+=t){
-    //     hv.push_back(hString.substr(i,t));
-    //     vv.push_back(vString.substr(i,t));
-    // }
-    
-    //generating tBlocks for every substring and permutation combination
-    // for(int k=0; k<hv.size();k++){
-    //     for(int n=0;n<vv.size();n++){
-    //         for(int l=0;l<perms.size();l++){
-    //            for(int m=0;m<perms.size();m++){
-    //                 tBlock block=tBlock(hv.at(k),vv.at(n),perms.at(l),perms.at(m));
-
-    //                 //buidling a string key for the map
-    //                 stringstream ss;
-    //                 ss<<hv.at(k)<<vv.at(n);
-    //                 string s;
-    //                 for(auto const& e : perms.at(l)) s += to_string(e);                      
-    //                 for(auto const& e : perms.at(m)) s += to_string(e);
-    //                 ss<<s;
-                        
-    //                 //adding the tblock to the unordered_map
-    //                 blockMap.insert( { ss.str(), block });
-    //             }
-    //         } 
-    //     }       
-    // }
-
-
+        
     vector<thread> workers;
     mutex semafor;
     auto thr=[this,&semafor,size](pair<vector<int>,string> el2){
@@ -99,21 +65,10 @@ void fourRussians::generateTBlocks(){
                     string y=*(permsSP+k);
                     tBlock block=tBlock(x,y,el2.first,el1.first);
 
-                    //buidling a string key for the map
-                    //stringstream ss;
-                    //ss<<x<<y;
-                    //string s;
-                    // for(auto const& e : b) s += to_string(e);                      
-                    // for(auto const& e : permsO[i]) s += to_string(e);
-                    //s+=intVecToStr(b);
-                    //s+=intVecToStr(permsO[i]);
-                    //ss<<s;
-                        
                     //adding the tblock to the unordered_map
                     semafor.lock();
                     string s=x+y+el2.second+el1.second;
                     blockMap.insert( { s, block });
-                    //blockMap.insert( { ss.str(), block });
                     semafor.unlock();
                 }
             } 
@@ -124,17 +79,11 @@ void fourRussians::generateTBlocks(){
     }
     
 
-    /*
-    for(int i=0; i<permsO.size();i++){
-        // string tmp(permsS[i].begin(),permsS[i].end());
-        workers.push_back(thread(thr,permsO[i]));
-    }
-    */
+    
     cout<<workers.size()<<endl;
     for(auto &t :workers){
         t.join();
     }
-    //cout<<blockMap.size();
 
     delete[] permsSP;
     
@@ -169,33 +118,6 @@ void fourRussians::permutateO(vector<int> posOffset,vector<int> prefix, int leng
         }
 }
 
-/*
-void fourRussians::permutateS(vector<char> posString,vector<char> prefix, int length){
-    
-    //Base case
-    if (length == 1){
-            for (int j = 0; j < posString.size(); j++){
-                vector<char> tmp;
-                if (prefix.size()!=0){
-                    tmp.insert( tmp.end(), prefix.begin(), prefix.end() );
-                }
-                tmp.push_back(posString.at(j));
-                permsSP.push_back(tmp);
-            }
-        }
-    else
-        {
-            // One by one add all vectors from posString and  make a recursive call with length-1
-            for (int i = 0; i < posString.size(); i++){
-                vector<char> tmp;
-                if (prefix.size()!=0){
-                    tmp.insert( tmp.end(), prefix.begin(), prefix.end() );
-                }
-                tmp.push_back(posString.at(i));
-                permutateS(posString, tmp ,length - 1);
-            }
-        }
-}*/
 
 void fourRussians::permutateS(const char str[],string prefix,const int n, const int lenght, int* k)
 {
@@ -216,118 +138,110 @@ void fourRussians::permutateS(const char str[],string prefix,const int n, const 
 }
 
 
-//Method for filling the d-table with precomputed values of t-blocks
-/*void fourRussians::fillDTable(){
-    //init d-table
-    int n=hString.size()+1;
-    dTable.resize(n);
-    for(int i=0;i<dTable.size();i++){
-        dTable[i].resize(n);
-    }
-    dTable[0][0]=0;
-    for(int i=1;i<n;i++){
-        dTable[0][i]=dTable[0][i-1]+1;
-        dTable[i][0]=dTable[i-1][0]+1;
-    }
 
-    //for each substring and its offset get the precomputed t-block and fill the d-table with its output offsets
-    for(int i=0;i<vString.size();i+=t){
-        for(int j=0;j<hString.size();j+=t){
-            string s1=hString.substr(j,t),s2=vString.substr(i,t),o1="",o2="";
-            for(int k=1;k<t+1;k++){
-                o1+=to_string(dTable[i][j+k]-dTable[i][j+k-1]);
-                o2+=to_string(dTable[i+k][j]-dTable[i+k-1][j]);
-            }
-            tBlock currentBlock=blockMap[s1+s2+o1+o2];
-            for(int k=1;k<t;k++){
-                dTable[i+t][j+k]=dTable[i+t][j+k-1]+currentBlock.hOffsets[k-1];
-                dTable[i+k][j+t]=dTable[i+k-1][j+t]+currentBlock.vOffsets[k-1];
-            }
-            dTable[i+t][j+t]=dTable[i+t][j+t-1]+currentBlock.hOffsets[currentBlock.hOffsets.size()-1];
-        }
-    }
-}
 
-//Print contents of d-table on stdout
-void fourRussians::printDTable(){
-    for(int i=0;i<dTable.size();i++){
-        string s="";
-        for(int j=0;j<dTable[i].size();j++){
-            s+=to_string(dTable[i][j])+" ";
-        }
-        cout<<s<<endl;
-    }
-}
-*/
+class SyncObj {
+    mutex mux;
+    condition_variable cv;  
+    bool completed[2]{ true,true };
 
+public:
+    void signalCompetionT1T2(int id) {
+        lock_guard<mutex> ul(mux);
+        completed[id] = true;
+        cv.notify_all();
+    }
+    void signalCompetionT3() {
+        lock_guard<mutex> ul(mux);
+        completed[0] = false;
+        completed[1] = false;
+        cv.notify_all();
+    }
+    void waitForCompetionT1T2() {
+        unique_lock<mutex> ul(mux);             
+        cv.wait(ul, [&]() {return completed[0] && completed[1]; });         
+    }
+    void waitForCompetionT3(int id) {
+        unique_lock<mutex> ul(mux);         
+        cv.wait(ul, [&]() {return !completed[id]; });           
+    }       
+};
 
 
 void fourRussians::fillDTable(){
-    // vector<string> hv;
-    // vector<string> vv;
-    // dTable.resize(vString.size()/t);
-
-    // for(int i=0;i<dTable.size();i++){
-    //     dTable[i].resize(hString.size()/t);
-    // }
-    //creating substrings of initial strings
-    //there are two for loops in case string aren't the same length 
-    // for(int i=0;i<hString.size();i+=t){
-    //     hv.push_back(hString.substr(i,t));
-    // }
-
-    // for(int i=0;i<vString.size();i+=t){
-    //     vv.push_back(vString.substr(i,t));
-    // }
-
-
-    //for every substring calculate tBlock and fill D-table
-    tBlock currentBlock;
-    for(int i=0;i<vSubS.size();i++){
-        vector<tBlock> tmp;
-        for(int j=0;j<hSubS.size();j++){
-            string b="";
-            string c="";
-            for(int k=0;k<t;k++){
-                    b+="1";
-                    c+="1";
-            }
-            if(i==0 & j!=0){
-                c="";
-                // for(auto const& e : dTable[i][j-1].vOffsets) c += to_string(e);
-                // for(auto const& e : currentBlock.vOffsets) c+=to_string(e);
-                //c=intVecToStr(currentBlock.vOffsets);
-                c=permsO[currentBlock.vOffsets];
-            }
-            if(i!=0 & j==0){
-                b="";
-                // for(auto const& e : blockMap[dTable[i-1][j]].hOffsets) b += to_string(e);
-                //b=intVecToStr(blockMap[dTable[i-1][j]].hOffsets);
-                b=permsO[dTable[i-1][j].hOffsets];
-            }
-            if(i!=0 & j!=0){
-                c="";b="";
-                // for(auto const& e : blockMap[dTable[i-1][j]].hOffsets) b += to_string(e);
-                //b=intVecToStr(blockMap[dTable[i-1][j]].hOffsets);
-                b=permsO[dTable[i-1][j].hOffsets];
-                // for(auto const& e : dTable[i][j-1].vOffsets) c += to_string(e);
-                // for(auto const& e : currentBlock.vOffsets) c+=to_string(e);
-                //c=intVecToStr(currentBlock.vOffsets);
-                c=permsO[currentBlock.vOffsets];
-            }
-            string s=hSubS[j]+vSubS[i]+b+c;
-            //cout<<s;
-            currentBlock=blockMap[s];
-            //cout<<"\n";
-            
-            tmp.push_back(currentBlock);
-        }
-        dTable.push_back(tmp);
+    dTable.resize(vString.size()/t);
+    for(int i=0;i<dTable.size();i++){
+        dTable[i].resize(hString.size()/t);
     }
 
-    // printDTable();
+    SyncObj obj;
+    mutex l;
+    auto thrDiag=[this,&obj,&l](){
+        for(int i=0;i<vSubS.size();i++){
+            obj.waitForCompetionT1T2();
+            string x=hSubS[i],y=vSubS[i],b,c;
+            if(i==0){
+                b=c=string(t,'1');
+            }
+            else{
+                b=permsO[dTable[i-1][i].hOffsets];
+                c=permsO[dTable[i][i-1].vOffsets];
+            }
+            // l.lock();
+            dTable[i][i]=blockMap[x+y+b+c];
+            // l.unlock();
+            obj.signalCompetionT3();
+        }
+    };
+    auto thrRow=[this,&obj,&l](){
+        for(int i=0;i<vSubS.size();i++){
+            obj.waitForCompetionT3(0);
+            tBlock prevBlock=dTable[i][i];
+            for(int j=i+1;j<hSubS.size();j++){
+                string x=hSubS[j],y=vSubS[i],b,c=permsO[prevBlock.vOffsets];
+                if(i==0){
+                    b=string(t,'1');
+                }
+                else{
+                    b=permsO[dTable[i-1][j].hOffsets];
+                }
+                // l.lock();
+                dTable[i][j]=blockMap[x+y+b+c];
+                // l.unlock();
+                prevBlock=dTable[i][j];
+            }
+            obj.signalCompetionT1T2(0);
+        }
+    };
+    auto thrCol=[this,&obj,&l](){
+        for(int i=0;i<hSubS.size();i++){
+            obj.waitForCompetionT3(1);
+            tBlock prevBlock=dTable[i][i];
+            for(int j=i+1;j<vSubS.size();j++){
+                string x=hSubS[i],y=vSubS[j],b=permsO[prevBlock.hOffsets],c;
+                if(i==0){
+                    c=string(t,'1');
+                }
+                else{
+                    c=permsO[dTable[j][i-1].vOffsets];
+                }
+                // l.lock();
+                dTable[j][i]=blockMap[x+y+b+c];
+                // l.unlock();
+                prevBlock=dTable[j][i];
+            }
+            obj.signalCompetionT1T2(1);
+        }
+    };
 
-    
+    vector<thread> threads;
+    threads.push_back(thread(thrDiag));
+    threads.push_back(thread(thrRow));
+    threads.push_back(thread(thrCol));
+    for(auto & t:threads){
+        t.join();
+    }
+
 }
 
 
@@ -351,6 +265,5 @@ int fourRussians::getMinDistance(){
         }
     }
     return tmp+hString.size();
-    //return dTable[n][n];
 }
 
