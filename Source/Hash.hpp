@@ -7,6 +7,8 @@
 
 using namespace std;
 
+//authors = Iva
+//this is custom implementation of hash function for vectors
 struct VectorHash {
     size_t operator()(vector<int> v) const noexcept {
                 int n=0;

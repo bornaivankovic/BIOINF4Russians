@@ -2,6 +2,9 @@
 #include <iostream>
 
 using namespace std;
+
+//authors = Borna
+//this class represents one T-Block
 tBlock::tBlock(){}
 vector<vector<int>> tBlock::calcBody(int t,const string& x,const string& y,vector<int>& b,vector<int>& c){
     vector< vector<int> > block;

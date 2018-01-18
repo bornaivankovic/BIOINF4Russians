@@ -23,7 +23,6 @@ class fourRussians{
         vector< vector<tBlock*> > dTable;
         vector<string> hSubS;
         vector<string> vSubS;
-        
 
         fourRussians(int t, string hString, string vString, string outputFile); 
 
@@ -31,7 +30,6 @@ class fourRussians{
         void permutateS(const char str[],string prefix,const int n, const int lenght, int* k);
         void generateTBlocks();
         void fillDTable();
-        void printDTable();
         void makeEditScript();
         int getMinDistance();
     

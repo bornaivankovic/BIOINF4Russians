@@ -10,10 +10,13 @@
 #include <cmath>
 #include <atomic>
 #include <condition_variable>
-
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
+//authors = Borna, Josipa, Iva
+//this class is used to implement 4 Russians algorithm
 fourRussians::fourRussians(int t, string hString, string vString, string outputFile){
     this->t=t;
     for(int i=hString.size()%t;i>0;i--){
@@ -34,6 +37,7 @@ fourRussians::fourRussians(int t, string hString, string vString, string outputF
         
 }
 
+//function used for converting vector of 0s, 1s and -s to string
 string intVecToStr(vector<int>& vec){
     string s;
     for(int i=0;i<vec.size();i++){
@@ -83,16 +87,12 @@ void fourRussians::generateTBlocks(){
     for(pair<vector<int>,string> element : permsO){
         workers.push_back(thread(thr,element));
     }
-    
 
-    
-    //cout<<workers.size()<<endl;
     for(auto &t :workers){
         t.join();
     }
+    delete[] permsSP;   
 
-    delete[] permsSP;
-    
 }
 
 //recursive function that creates all permutations of possible offsets(0,-1,1) 
@@ -124,7 +124,7 @@ void fourRussians::permutateO(vector<int> posOffset,vector<int> prefix, int leng
         }
 }
 
-
+//recursive function that creates all permutations of alphabet
 void fourRussians::permutateS(const char str[],string prefix,const int n, const int lenght, int* k)
 {
     if (lenght == 1)
@@ -143,7 +143,7 @@ void fourRussians::permutateS(const char str[],string prefix,const int n, const 
         }
 }
 
-
+//function that fills D-Table
 void fourRussians::fillDTable(){
     dTable.resize(vString.size()/t);
     for(int i=0;i<dTable.size();i++){
@@ -171,17 +171,7 @@ void fourRussians::fillDTable(){
 
 }
 
-
-void fourRussians::printDTable(){
-    // for(int i=0; i<dTable.size();i++){
-    //     for(int j=0;j<dTable.size();j++){
-    //         string s="";
-    //         for(auto const& e : dTable[i][j].vOffsets) s += to_string(e);
-    //         cout<<s;
-    //     }
-    // }
-}
-
+//function for making edit script
 void fourRussians::makeEditScript(){
     int i=t,j=t,x=vSubS.size()-1,y=hSubS.size()-1;
 
@@ -310,9 +300,16 @@ void fourRussians::makeEditScript(){
             ss+=vString[s2++];
         }
     }
-    cout<<fs<<endl;
-    cout<<mid<<endl;
-    cout<<ss<<endl;
+
+    ofstream outFile;
+    outFile.open(outputFile);
+    for (int i = 0; i < fs.length(); i += 60) {
+        outFile << fs.substr(i, 60) << endl;
+        outFile << mid.substr(i, 60) << endl;
+        outFile << ss.substr(i, 60) << endl;
+    }
+    outFile.close();
+
 }
 
 //Get min string edit distance

@@ -13,6 +13,8 @@
 
 using namespace std;
 
+//authors = Josipa
+//Main method for executing algorithm
 int main(int argc, char *argv[])
 {
     string inputFile;
@@ -61,8 +63,11 @@ int main(int argc, char *argv[])
     {
         cout << "Cannot open file " << inputFile << endl;
     }
+
+    //do the algorithm
     fourRussians fr = fourRussians(tBlockSize, firstString, secondString, outputFile);
 
+    //generate T-Blocks and measure time needed to do so
     cout << "Generating T-Blocks:" << endl;
     auto start = chrono::high_resolution_clock::now();  
     fr.generateTBlocks();
@@ -71,6 +76,7 @@ int main(int argc, char *argv[])
     cout << "T-Blocks generated!" << endl;
     cout << "Duration of T-Blocks generation: " << elapsed1.count() << " s\n";
     
+    //fill D-Table and measure time needed to do so
     cout << "Filling D-Table:" << endl;
     start = chrono::high_resolution_clock::now();
     fr.fillDTable();
@@ -79,8 +85,10 @@ int main(int argc, char *argv[])
     cout << "D-Table filled!" << endl;
     cout << "Duration of D-Table filling: " << elapsed2.count() << " s\n";
 
+    //print minimal edit distance
     cout << "Min edit distance: " << fr.getMinDistance() << endl;
-    
+
+    //make edit script and measure time needed to do so
     cout << "Making edit script:" << endl;
     start = chrono::high_resolution_clock::now();
     fr.makeEditScript();
@@ -89,7 +97,7 @@ int main(int argc, char *argv[])
     cout << "Edit script made!" << endl;
     cout << "Duration of script making: " << elapsed3.count() << " s\n";
 
-
+    //calculate memory and time 
     chrono::duration<double> elapsed = elapsed1 + elapsed2 + elapsed3;
     cout << "Elapsed time: " << elapsed.count() << " s\n";
     double memory = fr.dTable.size()*fr.dTable[0].size()*sizeof(tBlock*)
