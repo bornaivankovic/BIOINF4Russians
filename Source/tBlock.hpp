@@ -11,4 +11,5 @@ public:
 
     tBlock();
     tBlock(const string& x,const string& y,vector<int>& b,vector<int>& c);
+    static vector<vector<int>> calcBody(int t,const string& x,const string& y,vector<int>& b,vector<int>& c);
 };

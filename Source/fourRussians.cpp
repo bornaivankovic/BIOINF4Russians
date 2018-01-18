@@ -127,51 +127,21 @@ void fourRussians::permutateO(vector<int> posOffset,vector<int> prefix, int leng
 
 void fourRussians::permutateS(const char str[],string prefix,const int n, const int lenght, int* k)
 {
-        if (lenght == 1)
-            {
-                for (int j = 0; j < n; j++){ 
-                    *(permsSP + *k)=prefix + str[j];
-                    (*k)++;
-                }
+    if (lenght == 1)
+        {
+            for (int j = 0; j < n; j++){ 
+                *(permsSP + *k)=prefix + str[j];
+                (*k)++;
             }
-        else
-            {
-                for (int i = 0; i < n; i++){
-                    permutateS(str, prefix + str[i], n, lenght - 1, k);
-                
-                }
+        }
+    else
+        {
+            for (int i = 0; i < n; i++){
+                permutateS(str, prefix + str[i], n, lenght - 1, k);
+            
             }
+        }
 }
-
-
-
-
-class SyncObj {
-    mutex mux;
-    condition_variable cv;  
-    bool completed[2]{ true,true };
-
-public:
-    void signalCompetionT1T2(int id) {
-        lock_guard<mutex> ul(mux);
-        completed[id] = true;
-        cv.notify_all();
-    }
-    void signalCompetionT3() {
-        lock_guard<mutex> ul(mux);
-        completed[0] = false;
-        completed[1] = false;
-        cv.notify_all();
-    }
-    void waitForCompetionT1T2() {
-        unique_lock<mutex> ul(mux);             
-        cv.wait(ul, [&]() {return completed[0] && completed[1]; });         
-    }
-    void waitForCompetionT3(int id) {
-        unique_lock<mutex> ul(mux);         
-        cv.wait(ul, [&]() {return !completed[id]; });           
-    }       
-};
 
 
 void fourRussians::fillDTable(){
@@ -180,66 +150,23 @@ void fourRussians::fillDTable(){
         dTable[i].resize(hString.size()/t);
     }
 
-    SyncObj obj;
-    mutex l;
-    auto thrDiag=[this,&obj,&l](){
-        for(int i=0;i<vSubS.size();i++){
-            obj.waitForCompetionT1T2();
-            string x=hSubS[i],y=vSubS[i],b,c;
+    for(int i=0;i<dTable.size();i++){
+        for(int j=0;j<dTable.size();j++){
+            string x=hSubS[j],y=vSubS[i],b,c;
             if(i==0){
-                b=c=string(t,'1');
+                b=string(t,'1');
             }
             else{
-                b=permsO[dTable[i-1][i]->hOffsets];
-                c=permsO[dTable[i][i-1]->vOffsets];
+                b=permsO[dTable[i-1][j]->hOffsets];
             }
-            dTable[i][i]=&blockMap[x+y+b+c];
-            obj.signalCompetionT3();
-        }
-    };
-    auto thrRow=[this,&obj,&l](){
-        for(int i=0;i<vSubS.size();i++){
-            obj.waitForCompetionT3(0);
-            tBlock* prevBlock=dTable[i][i];
-            for(int j=i+1;j<hSubS.size();j++){
-                string x=hSubS[j],y=vSubS[i],b,c=permsO[prevBlock->vOffsets];
-                if(i==0){
-                    b=string(t,'1');
-                }
-                else{
-                    b=permsO[dTable[i-1][j]->hOffsets];
-                }
-                dTable[i][j]=&blockMap[x+y+b+c];
-                prevBlock=dTable[i][j];
+            if(j==0){
+                c=string(t,'1');
             }
-            obj.signalCompetionT1T2(0);
-        }
-    };
-    auto thrCol=[this,&obj,&l](){
-        for(int i=0;i<hSubS.size();i++){
-            obj.waitForCompetionT3(1);
-            tBlock *prevBlock=dTable[i][i];
-            for(int j=i+1;j<vSubS.size();j++){
-                string x=hSubS[i],y=vSubS[j],b=permsO[prevBlock->hOffsets],c;
-                if(i==0){
-                    c=string(t,'1');
-                }
-                else{
-                    c=permsO[dTable[j][i-1]->vOffsets];
-                }
-                dTable[j][i]=&blockMap[x+y+b+c];
-                prevBlock=dTable[j][i];
+            else{
+                c=permsO[dTable[i][j-1]->vOffsets];
             }
-            obj.signalCompetionT1T2(1);
+            dTable[i][j]=&blockMap[x+y+b+c];
         }
-    };
-
-    vector<thread> threads;
-    threads.push_back(thread(thrDiag));
-    threads.push_back(thread(thrRow));
-    threads.push_back(thread(thrCol));
-    for(auto & t:threads){
-        t.join();
     }
 
 }
@@ -256,49 +183,136 @@ void fourRussians::printDTable(){
 }
 
 void fourRussians::makeEditScript(){
+    int i=t,j=t,x=vSubS.size()-1,y=hSubS.size()-1;
 
-    int x = hString.length();
-    int y = vString.length();
-    int xBlocks = (int)x/t;
-    int yBlocks = (int)y/t;
+    //v1 - diagonal value, v2 - left value, v3 - up value
+    int v1,v2,v3,m;
 
-    string outFirst;
-    string outSecond;
-    string operations;
-
-    tBlock *block = dTable[xBlocks - 1][yBlocks - 1];
-    vector<int> v;
-    vector<int> h;
-
-    while(minDistance > 0){
-        v = block->vOffsets;
-        h = block->hOffsets;
-
-        if(v[t-1] == h[t-1] && hString[x - 1] != vString[y - 1]){
-            for(int i = t - 1; i == -1; i--){
-                minDistance -= v[i];
-            }
-            xBlocks--;
-        } else if(v[t-1] > h[t-1]){
-            for(int i = t - 1; i == -1; i--){
-                minDistance -= v[i];
-            }
-            xBlocks--;
-        }else if( v[t-1] < h[t-1]){
-            for(int i = t - 1; i == -1; i--){
-                minDistance -= h[i];
-            }
-            yBlocks--;
-        } else {
-            xBlocks--;
-            yBlocks--;
+    //0=diag 1=left 2=up
+    vector<int> actions;
+    vector<vector<int>> curBlock;
+    vector<int> b,c;
+    while(true){
+        if(x==0 && y==0 && i==0 && j==0 ) break;
+        if(x==0){
+            b=vector<int>(t,1);
         }
-        x -= t;
-        y -= t;
-        block = dTable[xBlocks - 1][yBlocks - 1];
-
+        else{
+            b=dTable[x-1][y]->hOffsets;
+        }
+        if(y==0){
+            c=vector<int>(t,1);
+        }
+        else{
+            c=dTable[x][y-1]->vOffsets;
+        }
+        
+        curBlock=tBlock::calcBody(t,hSubS[y],vSubS[x],b,c);
+        if(x<=0 || y<=0){
+            if(x<=0) x=0;
+            if(y<=0) y=0;
+            if(i-1<0 ){
+                v3=hString.size();
+            }
+            else{
+                v3=curBlock[i-1][j];
+            }
+            if(j-1<0 ){
+                v2=hString.size();
+            }
+            else{
+                v2=curBlock[i][j-1];
+            }
+            if(i-1<0 || j-1<0){
+                v1=hString.size();
+            }
+            else{
+                v1=curBlock[i-1][j-1];
+            }
+        }
+        else{
+            v1=curBlock[i-1][j-1];
+            v2=curBlock[i][j-1];
+            v3=curBlock[i-1][j];
+        }
+        m=min({v1,v2,v3});
+        // cout<<x<<","<<y<<","<<i<<","<<j<<":"<<v1<<","<<v2<<","<<v3<<endl;
+        if(m==v1){
+            //go diag
+            i--;
+            j--;
+            actions.push_back(0);
+            if(i==0 && j>0){
+                if(x!=0){
+                    x--;
+                    i=t;
+                }
+            }
+            if(j==0 && i>0){
+                if(y!=0){
+                    y--;
+                    j=t;
+                }
+            }
+            if(j==0 && i==0){
+                if(x!=0 && y!=0){
+                    x--;
+                    y--;
+                    i=j=t;
+                }
+            }
+        }
+        else if(m==v2){
+            //go left
+            j--;
+            actions.push_back(1);
+            if(j==0){
+                if(y!=0){
+                    y--;
+                    j=t;
+                }
+            }
+        }
+        else{
+            //go up
+            i--;
+            actions.push_back(2);
+            if(i==0){
+                if(x!=0){
+                    x--;
+                    i=t;
+                }
+            }
+        }
     }
-
+    string fs="",ss="",mid="";
+    int asdf=0;
+    int s1=0,s2=0;
+    for(int i=actions.size()-1;i>=0;i--){
+        if(actions[i]==0){
+            if (hString[s1]==vString[s2]){
+                mid+="|";
+            }
+            else{
+                mid+=".";
+            }
+            fs+=hString[s1++];
+            ss+=vString[s2++];
+        }
+        else if(actions[i]==1){
+            mid+=" ";
+            fs+=hString[s1++];
+            ss+="-";
+        }
+        else{
+            mid+=" ";
+            fs+="-";
+            ss+=vString[s2++];
+        }
+    }
+    cout<<fs<<endl;
+    cout<<mid<<endl;
+    cout<<ss<<endl;
 }
 
 //Get min string edit distance
